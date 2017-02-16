@@ -5,6 +5,7 @@
 #include <time.h>
 #include <vector>
 #include <bitset>
+#include <cmath>
 #include "HuffmanCoder.h"
 #include "ContecstHuffmanCoder.h"
 
@@ -86,6 +87,30 @@ void prov(vector<unsigned char>stream, vector<unsigned char>stream2){
     }
 }
 
+void statistics(vector<unsigned char> stream, float p){
+    float h = 0;
+    int size_ar = 1000000;
+    int *statistics = new int[size_ar];
+    float p_teor;
+    float p_pr;
+    for (int i = 0; i < 5; i++)
+            statistics[i] = 0;
+    for (int i = 0; i < stream.size(); i++){
+        if (stream[i] < size_ar){
+	    int ggg = stream[i] - '0';
+            statistics[ggg]++;
+        }
+    }
+    for (int i = 0; i < 5; i++){
+	std::cout << statistics[i] << std::endl;
+        if (statistics[i] > 0){
+            float p = (float)statistics[i] / stream.size();
+            h += p * log2(p);
+        }
+    }
+    delete[] statistics;
+}
+
 int main(int argc, char **argv) {
     srand(time(NULL));
     int N = 1000000;
@@ -94,11 +119,11 @@ int main(int argc, char **argv) {
     char *name_file_en_hc_2 = "stream_encode_ch_2.txt";
     char *name_file_dec_hc_1 = "stream_decode_ch_1.txt";
     char *name_file_dec_hc_2 = "stream_decode_ch_2.txt";
-    /*float p_standart[5][5] = {{0.25, 0.25, 0.1, 0.2, 0.2},
-			      {0.1, 0.1, 0.1, 0.65, 0.05},
-			      {0.1, 0.3, 0.2, 0.2, 0.2},
-			      {0.2, 0.3, 0.1, 0.1, 0.3},
-			      {0.3, 0.1, 0.2, 0.3, 0.1}};*/
+    float p_standart[5][5] = {{0.6, 0.1, 0.1, 0.1, 0.1},
+			      {0, 0.85, 0.05, 0, 0.1},
+			      {0, 0, 1, 0, 0},
+			      {0.01, 0.05, 0.04, 0.9, 0},
+			      {0, 0, 0, 0.1, 0.9}};
     float p_generate[5][5];
     for (int i = 0; i < 5; i++){
 	float sum = 1.0;
@@ -114,7 +139,7 @@ int main(int argc, char **argv) {
 	}
 	p_generate[i][4] = sum;
     }
-    for (int i = 0; i < 5; i++){
+    /*for (int i = 0; i < 5; i++){
 	float vr = 0;
 	for (int j = 0; j < 5; j++){
 	    vr += p_generate[i][j];
@@ -122,11 +147,11 @@ int main(int argc, char **argv) {
 	}
 	std::cout << '\n';
 	std::cout<< vr << '\n';
-    }
-    generateStream(p_generate, N, name_stream_file);
-    
+    }*/
+    generateStream(p_standart, N, name_stream_file);
     vector<unsigned char>stream;
     readStrFile(name_stream_file, stream, N);
+    statistics(stream,0);
     
     //Huffman
     HuffmanCoder *hc = new HuffmanCoder();
@@ -178,7 +203,7 @@ int main(int argc, char **argv) {
     vector<unsigned char>con_stream_encode_2;
     vector<unsigned char>con_stream_decode_2;
     ContecstHuffmanCoder *chc2 = new ContecstHuffmanCoder();
-    chc2->buildTree(p_generate);
+    chc2->buildTree(p_standart);
     chc2->encode(stream, con_stream_encode_2, name_file_en_hc_2);
     chc2->decode(con_stream_encode_2, con_stream_decode_2, name_file_en_hc_2, name_file_dec_hc_2);    
     prov(stream, con_stream_decode_2);
